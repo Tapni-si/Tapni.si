@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>tapni. - Chytré NFC tagy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: { primary: '#FF6B4A', dark: '#1A1A1A', bg: '#F8F7F5' }
+                }
+            }
+        }
+    </script>
+    <style>
+        .bg-grid { background-image: linear-gradient(to right, #e5e7eb 1px, transparent 1px), linear-gradient(to bottom, #e5e7eb 1px, transparent 1px); background-size: 40px 40px; }
+        @keyframes scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        .animate-scroll { animation: scroll 15s linear infinite; display: flex; width: max-content; }
+        /* Animace pro FAQ */
+        .faq-answer { transition: max-height 0.3s ease-out, opacity 0.3s ease-out, margin-top 0.3s ease-out; max-height: 0; opacity: 0; overflow: hidden; margin-top: 0; }
+        .faq-answer.open { max-height: 200px; opacity: 1; margin-top: 1rem; }
+    </style>
+</head>
+<body class="bg-bg text-dark font-sans flex flex-col min-h-screen">
+
+    <!-- Top Bar -->
+    <div class="bg-dark text-white text-center text-xs font-semibold py-2">
+        Doprava zdarma při objednávce nad 1 200 Kč
+    </div>
+
+    <!-- Navigation -->
+    <nav class="border-b border-gray-200 sticky top-0 bg-bg z-40 bg-opacity-90 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+            <a href="index.html" class="flex items-center gap-2 text-xl font-bold">
+                <div class="w-6 h-6 bg-primary rounded-full flex items-center justify-center text-white text-xs">)(</div>
+                tapni<span class="text-primary">.</span>
+            </a>
+            <div class="hidden md:flex gap-8 font-medium text-sm">
+                <a href="index.html" class="text-primary border-b-2 border-primary pb-1">Úvod</a>
+                <a href="shop.html" class="hover:text-primary transition">Produkty</a>
+                <a href="kontakt.html" class="hover:text-primary transition">Kontakt</a>
+            </div>
+            <button onclick="toggleCart()" class="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100 relative">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                <span id="cart-badge" class="absolute -top-1 -right-1 bg-primary text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center hidden">0</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow">
+        <!-- Hero Section -->
+        <section class="bg-grid relative py-20 px-6 overflow-hidden">
+            <div class="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+                <div>
+                    <span class="inline-block border border-gray-300 bg-white px-3 py-1 rounded-full text-xs font-medium mb-6 uppercase tracking-wider text-gray-500">✨ Jeden dotyk. Nekonečné možnosti.</span>
+                    <h1 class="text-6xl md:text-8xl font-extrabold leading-[0.9] tracking-tight mb-6">
+                        Dotkni se.<br><span class="text-primary">Sdílej.</span><br>Zaujmi.
+                    </h1>
+                    <p class="text-lg text-gray-600 mb-8 max-w-md">Chytré NFC tagy, které propojí reálný svět s tím digitálním. Bez aplikace. Bez čekání. Stačí přiložit telefon.</p>
+                    <div class="flex gap-4">
+                        <a href="shop.html" class="bg-dark text-white px-6 py-3 rounded-full font-medium hover:bg-gray-800 transition flex items-center gap-2">Vybrat svůj tag &rarr;</a>
+                        <a href="#jak-to-funguje" class="border border-gray-300 bg-white px-6 py-3 rounded-full font-medium hover:bg-gray-50 transition">Jak to funguje</a>
+                    </div>
+                </div>
+                <div class="relative flex justify-center">
+                    <div class="w-72 h-72 md:w-96 md:h-96 rounded-full bg-blue-200 flex items-center justify-center relative shadow-xl">
+                        <div class="w-48 h-48 md:w-64 md:h-64 rounded-full bg-primary flex items-center justify-center text-white text-5xl font-bold shadow-inner">
+                            )(<br><span class="text-xl">tapni.</span>
+                        </div>
+                        <div class="absolute top-10 right-0 bg-[#D4FF47] text-dark font-bold text-sm px-4 py-2 rounded-xl transform rotate-12 shadow-lg">NFC uvnitř</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Scrolling Ticker -->
+        <div class="border-y border-gray-200 overflow-hidden py-3 bg-white flex">
+            <div class="animate-scroll text-sm font-bold text-gray-500 uppercase tracking-widest gap-8 whitespace-nowrap">
+                <span>✦ Google Recenze</span><span>✦ Wi-Fi jedním dotykem</span><span>✦ Chytré Menu</span><span>✦ Digitální vizitka</span>
+                <span>✦ Google Recenze</span><span>✦ Wi-Fi jedním dotykem</span><span>✦ Chytré Menu</span><span>✦ Digitální vizitka</span>
+                <span>✦ Google Recenze</span><span>✦ Wi-Fi jedním dotykem</span><span>✦ Chytré Menu</span><span>✦ Digitální vizitka</span>
+            </div>
+        </div>
+
+        <!-- How it works -->
+        <section id="jak-to-funguje" class="bg-dark text-white py-24 px-6">
+            <div class="max-w-7xl mx-auto grid md:grid-cols-2 gap-16">
+                <div>
+                    <div class="text-[#D4FF47] text-xs font-bold uppercase tracking-widest mb-4">Jednodušší už to nebude</div>
+                    <h2 class="text-5xl md:text-7xl font-bold mb-6">Tři kroky.<br>A jsi online.</h2>
+                    <p class="text-gray-400 text-lg">NFC funguje podobně jako bezkontaktní platba. Telefon nic nestahuje — rovnou otevře váš odkaz.</p>
+                </div>
+                <div class="bg-[#222] rounded-3xl p-8 grid grid-cols-1 sm:grid-cols-3 gap-8">
+                    <div><div class="text-[#D4FF47] font-bold mb-4">01</div><h3 class="text-xl font-bold mb-2 border-t border-gray-600 pt-4">Vyber</h3><p class="text-gray-400 text-sm">Zvolte si tag a řekněte nám, co má otevřít.</p></div>
+                    <div><div class="text-[#D4FF47] font-bold mb-4">02</div><h3 class="text-xl font-bold mb-2 border-t border-gray-600 pt-4">Přilož</h3><p class="text-gray-400 text-sm">Přiložte horní část telefonu k označenému místu.</p></div>
+                    <div><div class="text-[#D4FF47] font-bold mb-4">03</div><h3 class="text-xl font-bold mb-2 border-t border-gray-600 pt-4">Sdílej</h3><p class="text-gray-400 text-sm">Obsah se otevře během jediné sekundy.</p></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Banner -->
+        <section class="py-24 px-6 max-w-6xl mx-auto">
+            <div class="bg-blue-100 rounded-[2rem] overflow-hidden flex flex-col md:flex-row items-center">
+                <div class="p-12 md:w-1/2">
+                    <div class="text-xs font-bold uppercase tracking-widest mb-4 text-gray-500">Pro týmy a podniky</div>
+                    <h2 class="text-4xl md:text-5xl font-bold mb-4">Váš brand.<br>Váš chytrý tag.</h2>
+                    <p class="text-gray-600 mb-8">Připravíme NFC produkty s vaším logem, barvami i obsahem. Od deseti kusů až po tisícovou sérii.</p>
+                    <a href="kontakt.html" class="bg-dark text-white px-6 py-3 rounded-full font-medium inline-block">Chci nabídku na míru &rarr;</a>
+                </div>
+                <div class="md:w-1/2 h-full bg-gray-300 min-h-[300px] relative">
+                    <img src="https://images.unsplash.com/photo-1605810230434-7631ac76ec81" alt="NFC Platba" class="absolute inset-0 w-full h-full object-cover">
+                    <div class="absolute bottom-6 left-6 bg-[#D4FF47] text-xs font-bold px-3 py-1 rounded-full">Technologie, které rozumí každý</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ Section -->
+        <section class="py-24 px-6 max-w-5xl mx-auto border-t border-gray-200">
+            <div class="grid md:grid-cols-[1fr_2fr] gap-12 md:gap-24">
+                <div>
+                    <div class="text-xs font-bold uppercase tracking-widest mb-4 text-gray-500">Často se ptáte</div>
+                    <h2 class="text-6xl font-extrabold mb-6">FAQ</h2>
+                    <p class="text-gray-500 mb-8">Nenašli jste odpověď? Napište nám a rádi vám poradíme.</p>
+                    <a href="kontakt.html" class="border border-gray-300 bg-white px-6 py-3 rounded-full font-medium hover:bg-gray-50 transition inline-flex items-center gap-2">
+                        Kontaktovat nás &rarr;
+                    </a>
+                </div>
+                
+                <div class="space-y-0" id="faq-container">
+                    <!-- FAQ 1 -->
+                    <div class="border-b border-gray-200 py-6">
+                        <button class="w-full flex justify-between items-center text-left font-bold text-lg hover:text-primary transition" onclick="toggleFaq(this)">
+                            Potřebuji k použití aplikaci?
+                            <span class="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 transition-transform faq-icon">+</span>
+                        </button>
+                        <div class="faq-answer text-gray-500 text-sm">
+                            Ne. NFC tag otevře odkaz přímo v telefonu, bez instalace a registrace.
+                        </div>
+                    </div>
+                    
+                    <!-- FAQ 2 -->
+                    <div class="border-b border-gray-200 py-6">
+                        <button class="w-full flex justify-between items-center text-left font-bold text-lg hover:text-primary transition" onclick="toggleFaq(this)">
+                            Funguje tag se všemi telefony?
+                            <span class="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 transition-transform faq-icon">+</span>
+                        </button>
+                        <div class="faq-answer text-gray-500 text-sm">
+                            Funguje s většinou telefonů iPhone od modelu 7 a s Android telefony s podporou NFC.
+                        </div>
+                    </div>
+
+                    <!-- FAQ 3 -->
+                    <div class="border-b border-gray-200 py-6">
+                        <button class="w-full flex justify-between items-center text-left font-bold text-lg hover:text-primary transition" onclick="toggleFaq(this)">
+                            Mohu obsah tagu později změnit?
+                            <span class="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 transition-transform faq-icon">+</span>
+                        </button>
+                        <div class="faq-answer text-gray-500 text-sm">
+                            Ano. Stačí nám napsat a cíl vašeho tagu vám upravíme bez nutnosti měnit samotný produkt.
+                        </div>
+                    </div>
+
+                    <!-- FAQ 4 -->
+                    <div class="border-b border-gray-200 py-6">
+                        <button class="w-full flex justify-between items-center text-left font-bold text-lg hover:text-primary transition" onclick="toggleFaq(this)">
+                            Jak rychle objednávku odešlete?
+                            <span class="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 transition-transform faq-icon">+</span>
+                        </button>
+                        <div class="faq-answer text-gray-500 text-sm">
+                            Produkty bez vlastního potisku obvykle odesíláme do 2 pracovních dnů.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Big Red CTA -->
+        <section class="bg-primary text-white py-32 text-center px-6">
+            <div class="w-12 h-12 mx-auto mb-6 text-3xl font-bold flex items-center justify-center">)(</div>
+            <h2 class="text-5xl md:text-7xl font-bold mb-10 tracking-tight">Připraven udělat<br>první dotyk?</h2>
+            <a href="shop.html" class="bg-white text-dark px-8 py-4 rounded-full font-bold text-lg hover:bg-gray-100 transition inline-block">Prohlédnout produkty &rarr;</a>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-12 px-6">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+            <div>
+                <a href="index.html" class="flex items-center gap-2 text-xl font-bold mb-2">
+                    <div class="w-6 h-6 bg-primary rounded-full flex items-center justify-center text-white text-xs">)(</div>
+                    tapni<span class="text-primary">.</span>
+                </a>
+                <p class="text-gray-400 text-sm">Chytré spojení začíná dotykem.</p>
+            </div>
+            <div class="flex gap-6 text-sm text-gray-400">
+                <a href="shop.html" class="hover:text-white">Produkty</a>
+                <a href="kontakt.html" class="hover:text-white">Kontakt</a>
+                <a href="#" class="hover:text-white">Instagram ↗</a>
+                <a href="#" class="hover:text-white">TikTok ↗</a>
+            </div>
+            <div class="text-sm text-gray-500">© 2026 tapni.</div>
+        </div>
+    </footer>
+
+    <!-- CART SIDEBAR -->
+    <div id="cart-overlay" class="fixed inset-0 bg-black/50 z-50 hidden opacity-0 transition-opacity duration-300" onclick="toggleCart()"></div>
+    <div id="cart-drawer" class="fixed top-0 right-0 h-full w-full sm:w-[400px] bg-bg z-50 transform translate-x-full transition-transform duration-300 shadow-2xl flex flex-col">
+        <div class="p-6 border-b border-gray-200 flex justify-between items-center bg-white">
+            <div>
+                <div class="text-primary text-xs font-bold tracking-widest uppercase">Váš výběr</div>
+                <h2 class="text-2xl font-bold" id="cart-title">Košík (0)</h2>
+            </div>
+            <button onclick="toggleCart()" class="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-100">
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+        <div id="cart-content" class="flex-grow p-6 overflow-y-auto flex flex-col gap-4">
+            <!-- Dynamically populated from kosik.js -->
+        </div>
+        <div class="p-6 border-t border-gray-200 bg-white">
+            <div class="flex justify-between items-center mb-6 font-bold text-lg">
+                <span>Celkem</span>
+                <span id="cart-total">0 Kč</span>
+            </div>
+            <a href="objednavka.html" id="checkout-btn" class="w-full bg-dark text-white py-4 rounded-xl font-bold flex justify-center items-center gap-2 hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed">
+                Přejít k objednávce &rarr;
+            </a>
+        </div>
+    </div>
+
+    <!-- Scripty -->
+    <script src="kosik.js"></script>
+    <script>
+        // Logika pro FAQ (Rozbalování a změna ikony)
+        function toggleFaq(button) {
+            // Zavřít všechny ostatní otevřené FAQ
+            document.querySelectorAll('.faq-answer.open').forEach(answer => {
+                if (answer.previousElementSibling !== button) {
+                    answer.classList.remove('open');
+                    answer.previousElementSibling.querySelector('.faq-icon').innerText = '+';
+                }
+            });
+
+            // Otevřít/Zavřít kliknuté FAQ
+            const answer = button.nextElementSibling;
+            const icon = button.querySelector('.faq-icon');
+            
+            if (answer.classList.contains('open')) {
+                answer.classList.remove('open');
+                icon.innerText = '+';
+            } else {
+                answer.classList.add('open');
+                icon.innerText = '×';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dokončení objednávky | tapni.</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Skript pro Zásilkovna mapu -->
+    <script src="https://widget.packeta.com/v6/www/js/library.js"></script>
+    <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] }, colors: { primary: '#FF6B4A', dark: '#1A1A1A', bg: '#F8F7F5' } } } }</script>
+</head>
+<body class="bg-bg text-dark font-sans flex flex-col min-h-screen">
+    
+    <div class="max-w-xl mx-auto w-full px-6 py-10 flex-grow pb-32">
+        <div class="mb-8">
+            <div class="text-primary text-xs font-bold uppercase tracking-widest mb-1">Dokončení objednávky</div>
+            <div class="flex justify-between items-center">
+                <h1 class="text-3xl font-bold">Kontaktní údaje</h1>
+                <a href="shop.html" class="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100 transition">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </a>
+            </div>
+        </div>
+
+        <a href="shop.html" class="text-sm text-gray-500 flex items-center gap-2 mb-8 hover:text-dark transition">
+            &larr; Zpět do košíku
+        </a>
+
+        <form id="checkout-form">
+            <!-- Kontaktní údaje -->
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div><label class="block text-xs font-bold mb-1">Jméno a příjmení</label><input type="text" class="w-full bg-transparent border border-gray-300 rounded-xl p-3 text-sm focus:outline-none focus:border-primary" placeholder="Jan Novák" required></div>
+                <div><label class="block text-xs font-bold mb-1">E-mail</label><input type="email" class="w-full bg-transparent border border-gray-300 rounded-xl p-3 text-sm focus:outline-none focus:border-primary" placeholder="jan@email.cz" required></div>
+            </div>
+            <div class="mb-10">
+                <label class="block text-xs font-bold mb-1">Telefon</label><input type="tel" class="w-full bg-transparent border border-gray-300 rounded-xl p-3 text-sm focus:outline-none focus:border-primary" placeholder="+420 777 123 456" required>
+            </div>
+
+            <!-- Dynamicky generované pole pro tagy -->
+            <div class="mb-10">
+                <div class="flex items-start gap-4 mb-4">
+                    <div class="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center shrink-0"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg></div>
+                    <div>
+                        <h3 class="font-bold text-lg">Co máme do tagu nahrát?</h3>
+                        <p class="text-xs text-gray-500">Vložte odkaz na web, sociální síť, kontakt, recenze nebo napište vlastní požadavek.</p>
+                    </div>
+                </div>
+
+                <div id="checkout-items" class="space-y-4"></div>
+                <p class="text-[10px] text-gray-400 mt-3 flex gap-2"><svg width="12" height="12" class="shrink-0 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Pokud si nejste jisti, napište nám svůj záměr. Správné nastavení s vámi doladíme před výrobou.</p>
+            </div>
+
+            <!-- Způsob doručení -->
+            <div class="mb-10">
+                <h3 class="font-bold mb-4">Způsob doručení</h3>
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <!-- Možnost Zásilkovna -->
+                    <label id="label-zasilkovna" class="border-2 border-primary rounded-xl p-4 flex justify-between items-center cursor-pointer bg-red-50/30 transition-all">
+                        <div><div class="font-bold text-sm">Zásilkovna</div><div class="text-[10px] text-gray-500">Výdejní místo - zdarma</div></div>
+                        <input type="radio" name="shipping" value="zasilkovna" checked class="accent-primary w-4 h-4" onchange="toggleShipping()">
+                    </label>
+                    <!-- Možnost Kurýr -->
+                    <label id="label-kuryr" class="border border-gray-200 rounded-xl p-4 flex justify-between items-center cursor-pointer hover:border-gray-300 transition-all">
+                        <div><div class="font-bold text-sm">Na adresu</div><div class="text-[10px] text-gray-500">Kurýr - zdarma</div></div>
+                        <input type="radio" name="shipping" value="kuryr" class="accent-primary w-4 h-4" onchange="toggleShipping()">
+                    </label>
+                </div>
+                
+                <!-- Box Zásilkovna -->
+                <div id="zasilkovna-box" class="bg-white border border-gray-200 rounded-xl p-4 block">
+                    <div class="text-xs font-bold mb-2">Výdejní místo Zásilkovny</div>
+                    <div onclick="openZasilkovna()" class="bg-bg border border-gray-200 rounded-lg p-3 flex justify-between items-center text-sm text-gray-500 cursor-pointer mb-2 hover:border-primary transition">
+                        <span id="zasilkovna-name">Klikněte a vyberte pobočku na mapě</span>
+                        <div class="w-6 h-6 bg-primary text-white rounded-full flex items-center justify-center shrink-0">
+                            <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path></svg>
+                        </div>
+                    </div>
+                    <div onclick="openZasilkovna()" class="text-xs text-primary font-medium flex items-center gap-1 cursor-pointer hover:underline">
+                        <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path></svg> Otevřít mapu výdejních míst
+                    </div>
+                    <input type="hidden" id="zasilkovna-id" name="zasilkovna_id" required>
+                </div>
+
+                <!-- Box Kurýr (Na adresu) -->
+                <div id="address-box" class="bg-white border border-gray-200 rounded-xl p-4 hidden">
+                    <div class="text-xs font-bold mb-3">Doručovací adresa</div>
+                    <div class="space-y-3">
+                        <input type="text" id="address-street" class="w-full bg-bg border border-gray-200 rounded-lg p-3 text-sm focus:outline-none focus:border-primary" placeholder="Ulice a číslo popisné">
+                        <div class="grid grid-cols-2 gap-3">
+                            <input type="text" id="address-city" class="w-full bg-bg border border-gray-200 rounded-lg p-3 text-sm focus:outline-none focus:border-primary" placeholder="Město">
+                            <input type="text" id="address-zip" class="w-full bg-bg border border-gray-200 rounded-lg p-3 text-sm focus:outline-none focus:border-primary" placeholder="PSČ">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-10">
+                <h3 class="font-bold mb-4">Způsob platby</h3>
+                <select class="w-full bg-transparent border border-gray-300 rounded-xl p-4 text-sm font-medium focus:outline-none focus:border-primary appearance-none">
+                    <option>Platební kartou</option>
+                    <option>Bankovním převodem</option>
+                    <option>Apple Pay / Google Pay</option>
+                </select>
+            </div>
+            
+            <div class="border-t border-gray-200 pt-6"></div>
+            
+            <footer class="bg-dark text-white py-12 px-6">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+            <div>
+                <a href="index.html" class="flex items-center gap-2 text-xl font-bold mb-2">
+                    <div class="w-6 h-6 bg-primary rounded-full flex items-center justify-center text-white text-xs">)(</div>
+                    tapni<span class="text-primary">.</span>
+                </a>
+                <p class="text-gray-400 text-sm">Chytré spojení začíná dotykem.</p>
+            </div>
+            <div class="flex gap-6 text-sm text-gray-400">
+                <a href="shop.html" class="hover:text-white">Produkty</a>
+                <a href="kontakt.html" class="hover:text-white">Kontakt</a>
+                <a href="#" class="hover:text-white">Instagram ↗</a>
+                <a href="#" class="hover:text-white">TikTok ↗</a>
+            </div>
+            <div class="text-sm text-gray-500">© 2026 tapni.</div>
+        </div>
+    </footer>
+
+            <!-- Sticky CTA -->
+            <div class="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 p-6 z-40 shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
+                <div class="max-w-xl mx-auto">
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="text-sm text-gray-500">Celkem k úhradě</span>
+                        <span id="checkout-total" class="text-xl font-bold">0 Kč</span>
+                    </div>
+                    <button type="submit" class="w-full bg-dark text-white py-4 rounded-xl font-bold flex justify-center items-center gap-2 hover:bg-gray-800 transition">
+                        Odeslat objednávku &rarr;
+                    </button>
+                    <div class="text-[10px] text-gray-400 text-center mt-3">Odesláním souhlasíte se zpracováním údajů pro vyřízení objednávky.</div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const cart = JSON.parse(localStorage.getItem('tapni_cart')) || [];
+            const container = document.getElementById('checkout-items');
+            const totalEl = document.getElementById('checkout-total');
+            
+            if (cart.length === 0) {
+                container.innerHTML = '<div class="text-sm text-red-500 bg-red-50 p-4 rounded-lg">Váš košík je prázdný. <a href="shop.html" class="underline font-bold">Zpět do obchodu.</a></div>';
+                document.querySelector('button[type="submit"]').disabled = true;
+                return;
+            }
+
+            let html = '';
+            let total = 0;
+            
+            cart.forEach(item => {
+                total += item.price;
+                html += `
+                    <div>
+                        <label class="block text-xs font-bold mb-1">${item.name}</label>
+                        <div class="relative">
+                            <textarea rows="2" class="w-full bg-transparent border border-gray-300 rounded-xl p-3 text-sm focus:outline-none focus:border-primary transition" placeholder="Např. https://instagram.com/vasprofil nebo vlastní požadavek..." required></textarea>
+                            <svg class="absolute bottom-3 right-3 text-gray-400" width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+            totalEl.innerText = `${total} Kč`;
+        });
+
+        function toggleShipping() {
+            const isZasilkovna = document.querySelector('input[name="shipping"]:checked').value === 'zasilkovna';
+            
+            const labelZasilkovna = document.getElementById('label-zasilkovna');
+            const labelKuryr = document.getElementById('label-kuryr');
+            const boxZasilkovna = document.getElementById('zasilkovna-box');
+            const boxAddress = document.getElementById('address-box');
+            
+            const zasilkovnaId = document.getElementById('zasilkovna-id');
+            const addressInputs = [document.getElementById('address-street'), document.getElementById('address-city'), document.getElementById('address-zip')];
+
+            if (isZasilkovna) {
+                labelZasilkovna.className = "border-2 border-primary rounded-xl p-4 flex justify-between items-center cursor-pointer bg-red-50/30 transition-all";
+                labelKuryr.className = "border border-gray-200 rounded-xl p-4 flex justify-between items-center cursor-pointer hover:border-gray-300 transition-all";
+                
+                boxZasilkovna.classList.remove('hidden');
+                boxAddress.classList.add('hidden');
+                
+                zasilkovnaId.required = true;
+                addressInputs.forEach(input => input.required = false);
+            } else {
+                labelKuryr.className = "border-2 border-primary rounded-xl p-4 flex justify-between items-center cursor-pointer bg-red-50/30 transition-all";
+                labelZasilkovna.className = "border border-gray-200 rounded-xl p-4 flex justify-between items-center cursor-pointer hover:border-gray-300 transition-all";
+                
+                boxZasilkovna.classList.add('hidden');
+                boxAddress.classList.remove('hidden');
+                
+                zasilkovnaId.required = false;
+                addressInputs.forEach(input => input.required = true);
+            }
+        }
+
+        function openZasilkovna() {
+            const packetaOptions = {
+                language: 'cs',
+                country: 'cz'
+            };
+            
+            Packeta.Widget.pick('12345678', function(pickupPoint) {
+                if (pickupPoint != null) {
+                    const nameSpan = document.getElementById('zasilkovna-name');
+                    nameSpan.innerText = pickupPoint.name + ", " + pickupPoint.city;
+                    nameSpan.classList.remove('text-gray-500');
+                    nameSpan.classList.add('text-dark', 'font-bold');
+                    
+                    document.getElementById('zasilkovna-id').value = pickupPoint.id;
+                }
+            }, packetaOptions);
+        }
+
+        document.getElementById('checkout-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Děkujeme! Objednávka byla úspěšně odeslána.');
+            localStorage.removeItem('tapni_cart');
+            window.location.href = 'index.html';
+        });
+    </script>
+</body>
+</html>
