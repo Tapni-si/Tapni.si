@@ -118,7 +118,7 @@
             <div class="flex gap-6 text-sm text-gray-400">
                 <a href="shop.html" class="hover:text-white">Produkty</a>
                 <a href="kontakt.html" class="hover:text-white">Kontakt</a>
-                <a href="#" class="hover:text-white">Instagram ↗</a>
+                <a href="https://www.instagram.com/tapni.cz/" class="hover:text-white">Instagram ↗</a>
                 <a href="#" class="hover:text-white">TikTok ↗</a>
             </div>
             <div class="text-sm text-gray-500">© 2026 tapni.</div>
@@ -156,13 +156,14 @@
             let html = '';
             let total = 0;
             
-            cart.forEach(item => {
+            cart.forEach((item, index) => {
                 total += item.price;
                 html += `
-                    <div>
+                    <div class="mb-4">
                         <label class="block text-xs font-bold mb-1">${item.name}</label>
                         <div class="relative">
-                            <textarea rows="2" class="w-full bg-transparent border border-gray-300 rounded-xl p-3 text-sm focus:outline-none focus:border-primary transition" placeholder="Např. https://instagram.com/vasprofil nebo vlastní požadavek..." required></textarea>
+                            <!-- Přidali jsme ID k textaree, abychom z ní pak mohli vytáhnout text -->
+                            <textarea id="tag-obsah-${index}" rows="2" class="w-full bg-transparent border border-gray-300 rounded-xl p-3 text-sm focus:outline-none focus:border-primary transition" placeholder="Např. https://instagram.com/vasprofil nebo vlastní požadavek..." required></textarea>
                             <svg class="absolute bottom-3 right-3 text-gray-400" width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                         </div>
                     </div>
@@ -187,47 +188,93 @@
             if (isZasilkovna) {
                 labelZasilkovna.className = "border-2 border-primary rounded-xl p-4 flex justify-between items-center cursor-pointer bg-red-50/30 transition-all";
                 labelKuryr.className = "border border-gray-200 rounded-xl p-4 flex justify-between items-center cursor-pointer hover:border-gray-300 transition-all";
-                
                 boxZasilkovna.classList.remove('hidden');
                 boxAddress.classList.add('hidden');
-                
                 zasilkovnaId.required = true;
                 addressInputs.forEach(input => input.required = false);
             } else {
                 labelKuryr.className = "border-2 border-primary rounded-xl p-4 flex justify-between items-center cursor-pointer bg-red-50/30 transition-all";
                 labelZasilkovna.className = "border border-gray-200 rounded-xl p-4 flex justify-between items-center cursor-pointer hover:border-gray-300 transition-all";
-                
                 boxZasilkovna.classList.add('hidden');
                 boxAddress.classList.remove('hidden');
-                
                 zasilkovnaId.required = false;
                 addressInputs.forEach(input => input.required = true);
             }
         }
 
         function openZasilkovna() {
-            const packetaOptions = {
-                language: 'cs',
-                country: 'cz'
-            };
-            
             Packeta.Widget.pick('12345678', function(pickupPoint) {
                 if (pickupPoint != null) {
                     const nameSpan = document.getElementById('zasilkovna-name');
                     nameSpan.innerText = pickupPoint.name + ", " + pickupPoint.city;
                     nameSpan.classList.remove('text-gray-500');
                     nameSpan.classList.add('text-dark', 'font-bold');
-                    
                     document.getElementById('zasilkovna-id').value = pickupPoint.id;
                 }
-            }, packetaOptions);
+            }, { language: 'cs', country: 'cz' });
         }
 
+        // ==========================================
+        // NOVÁ FUNKCE PRO REÁLNÉ ODESLÁNÍ OBJEDNÁVKY
+        // ==========================================
         document.getElementById('checkout-form').addEventListener('submit', function(e) {
             e.preventDefault();
-            alert('Děkujeme! Objednávka byla úspěšně odeslána.');
-            localStorage.removeItem('tapni_cart');
-            window.location.href = 'index.html';
+            
+            const btn = document.querySelector('button[type="submit"]');
+            btn.innerHTML = 'Odesílám...';
+            btn.disabled = true;
+
+            const cart = JSON.parse(localStorage.getItem('tapni_cart')) || [];
+            let orderDetails = "";
+            
+            // Posbíráme obsah, který uživatel vepsal k tagům
+            cart.forEach((item, index) => {
+                const obsah = document.getElementById(`tag-obsah-${index}`).value;
+                orderDetails += `\n--- Produkt ${index + 1} ---\nNázev: ${item.name}\nCena: ${item.price} Kč\nNahrát na tag: ${obsah}\n`;
+            });
+
+            // Zabalíme všechna data do jednoho objektu
+            const data = {
+                _subject: "Nová objednávka webu tapni!",
+                Jméno: document.querySelector('input[placeholder="Jan Novák"]').value,
+                Email: document.querySelector('input[type="email"]').value,
+                Telefon: document.querySelector('input[type="tel"]').value,
+                Doprava: document.querySelector('input[name="shipping"]:checked').value,
+                Platba: document.querySelector('select').value,
+                Celková_cena: document.getElementById('checkout-total').innerText,
+                Položky: orderDetails
+            };
+
+            // Pokud je vybrána zásilkovna, pošleme ID pobočky, jinak adresu
+            if (data.Doprava === 'zasilkovna') {
+                data.Zasilkovna_pobocka = document.getElementById('zasilkovna-name').innerText;
+                data.Zasilkovna_ID = document.getElementById('zasilkovna-id').value;
+            } else {
+                data.Adresa = document.getElementById('address-street').value + ', ' + 
+                              document.getElementById('address-city').value + ' ' + 
+                              document.getElementById('address-zip').value;
+            }
+
+            // Odeslání přes bezplatné API
+            fetch("https://formsubmit.co/ajax/tapni.si@seznam.cz", {
+                method: "POST",
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert('Děkujeme! Objednávka byla úspěšně odeslána.');
+                localStorage.removeItem('tapni_cart');
+                window.location.href = 'index.html';
+            })
+            .catch(error => {
+                alert('Jejda, něco se pokazilo. Zkontrolujte připojení a zkuste to znovu.');
+                btn.innerHTML = 'Odeslat objednávku &rarr;';
+                btn.disabled = false;
+            });
         });
     </script>
 </body>
