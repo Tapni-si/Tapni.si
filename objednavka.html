@@ -226,14 +226,26 @@
 
             const cart = JSON.parse(localStorage.getItem('tapni_cart')) || [];
             let orderDetails = "";
+            let stripePaymentUrl = ""; // Zde se uloží správný odkaz
             
-            // Posbíráme obsah, který uživatel vepsal k tagům
+            // Nastavení odkazu podle obsahu košíku (toto je zjednodušený příklad, kdy čekáme v košíku jeden produkt)
+            if (cart.length > 0) {
+                 if (cart[0].name === 'TAP Card') {
+                      stripePaymentUrl = 'SE_VLOZ_TVUJ_STRIPE_LINK_PRO_KARTU'; // Příklad: 'https://buy.stripe.com/test_123...'
+                 } else if (cart[0].name === 'TAP Sticker') {
+                      stripePaymentUrl = 'SE_VLOZ_TVUJ_STRIPE_LINK_PRO_STICKER';
+                 } else if (cart[0].name === 'TAP Stand') {
+                      stripePaymentUrl = 'SE_VLOZ_TVUJ_STRIPE_LINK_PRO_STAND';
+                 } else {
+                      stripePaymentUrl = 'SE_VLOZ_TVUJ_OBECNY_STRIPE_LINK'; // Pokud by byl v košíku jiný produkt
+                 }
+            }
+            
             cart.forEach((item, index) => {
                 const obsah = document.getElementById(`tag-obsah-${index}`).value;
                 orderDetails += `\n--- Produkt ${index + 1} ---\nNázev: ${item.name}\nCena: ${item.price} Kč\nNahrát na tag: ${obsah}\n`;
             });
 
-            // Zabalíme všechna data do jednoho objektu
             const data = {
                 _subject: "Nová objednávka webu tapni!",
                 Jméno: document.querySelector('input[placeholder="Jan Novák"]').value,
@@ -245,7 +257,6 @@
                 Položky: orderDetails
             };
 
-            // Pokud je vybrána zásilkovna, pošleme ID pobočky, jinak adresu
             if (data.Doprava === 'zasilkovna') {
                 data.Zasilkovna_pobocka = document.getElementById('zasilkovna-name').innerText;
                 data.Zasilkovna_ID = document.getElementById('zasilkovna-id').value;
@@ -255,8 +266,8 @@
                               document.getElementById('address-zip').value;
             }
 
-            // Odeslání přes bezplatné API
-            fetch("https://formsubmit.co/ajax/tapni.si@seznam.cz", {
+            // Odeslání přes bezplatné API Formsubmit
+            fetch("https://formsubmit.co/ajax/TVUJ_EMAIL@seznam.cz", {
                 method: "POST",
                 headers: { 
                     'Content-Type': 'application/json',
@@ -266,9 +277,8 @@
             })
             .then(response => response.json())
             .then(data => {
-                alert('Děkujeme! Objednávka byla úspěšně odeslána.');
-                localStorage.removeItem('tapni_cart');
-                window.location.href = 'index.html';
+                // Přesměrování na platební bránu Stripe
+                window.location.href = stripePaymentUrl; 
             })
             .catch(error => {
                 alert('Jejda, něco se pokazilo. Zkontrolujte připojení a zkuste to znovu.');
